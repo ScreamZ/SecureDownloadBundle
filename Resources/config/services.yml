@@ -1,0 +1,4 @@
+services:
+    screamz.service.secure_downloader:
+        class: Screamz\SecureDownloadBundle\Services\SecureDownloader
+        arguments: [@stash, %secure_download%]
