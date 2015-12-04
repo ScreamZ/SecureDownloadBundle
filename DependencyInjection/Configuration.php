@@ -23,15 +23,18 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->arrayNode('cache')
+                    ->addDefaultsIfNotSet()
                     ->children()
                         ->integerNode('default_ttl')->defaultValue(300)->end()
                         ->scalarNode('stash_prefix_key')->defaultValue('secure_download_bundle')->end()
-                    ->end() // Cache
+                    ->end()
+                ->end() // Cache
                 ->arrayNode('document')
+                    ->addDefaultsIfNotSet()
                     ->children()
                         ->scalarNode('hash_salt')->defaultValue('screamzSecureDownloader')->end()
-                    ->end() // Document
-                ->end()
+                    ->end()
+                ->end() // Document
             ->end();
 
         return $treeBuilder;

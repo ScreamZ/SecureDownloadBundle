@@ -1,8 +1,8 @@
-#ScreamzSecureDownloadBundle
+#SecureDownloadBundle
 
-**This bundle is under development, the documentation will updated**
+**This bundle is under development, the documentation will be updated through the development process.**
 
-This bundle help you to set up a secure download document solution quickly using a Cache engine like Memcached or Redis.
+This bundle make it easier and quicker to deploy a secure download document solution, using a Cache engine like Memcached or Redis.
 
 Many cache system are supported thanks to [tedious/TedivmStashBundle!](https://github.com/tedious/TedivmStashBundle).
 At the moment the default one using service [@stash]( TedivmStashBundle/Service/CacheService.php), but
@@ -10,7 +10,15 @@ feel free to override my service declaration to use your own.
 
 ##Basic usage
 
-###Rendering the hash in view or returned to a webservice
+This is a two-step process, first you need to generate a unique hash, then this one will be used to call the download method.
+
+An access key is known by the encoder and by the decoder. This will allows you to secure the access to your document, it can be a simple hash or string if the context
+doesn't depend on it or it can be a salt mixed with a unique identifier of the current logged used, you can also use a cookie to save it or a session variable.
+Feel free to try different approaches.
+
+Here is an quick and easy example :
+
+###Rendering the hash in a view or returned it to a web service
 
     public function generateHashAction()
     {
@@ -35,7 +43,7 @@ feel free to override my service declaration to use your own.
         // Return response with hash (webservice) or render a template with link to download controller...
     }
 
-###Downloading the file for the given hash
+###Downloading the file using the given hash
 
     public function downloadAction($hash)
     {

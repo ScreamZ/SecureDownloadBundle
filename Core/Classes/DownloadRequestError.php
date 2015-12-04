@@ -16,7 +16,7 @@ class DownloadRequestError
      * @param int    $errorCode Use one const of {@link ErrorCode}
      * @param string $message
      */
-    public function __construct($errorCode, $message = 'DownloadRequest Error')
+    public function __construct($errorCode = ErrorCode::UNKNOWN_ERROR, $message = 'DownloadRequest Error')
     {
         $this->errorCode = $errorCode;
         $this->message = $message;
@@ -41,4 +41,14 @@ class DownloadRequestError
     {
         return $this->message;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function __toString()
+    {
+        return $this->errorCode.':'.$this->getMessage();
+    }
+
+
 }
