@@ -20,9 +20,19 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('secure_download');
 
-        $rootNode->children()
-            ->scalarNode('stashPrefixKey')->defaultValue('secure_download_bundle')->end()
-            ->scalarNode('documentHashSalt')->defaultValue('screamzSecureDownloader')->end();
+        $rootNode
+            ->children()
+                ->arrayNode('cache')
+                    ->children()
+                        ->integerNode('default_ttl')->defaultValue(300)->end()
+                        ->scalarNode('stash_prefix_key')->defaultValue('secure_download_bundle')->end()
+                    ->end() // Cache
+                ->arrayNode('document')
+                    ->children()
+                        ->scalarNode('hash_salt')->defaultValue('screamzSecureDownloader')->end()
+                    ->end() // Document
+                ->end()
+            ->end();
 
         return $treeBuilder;
     }

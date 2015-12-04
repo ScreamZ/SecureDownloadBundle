@@ -30,14 +30,14 @@ class DownloadRequest
 
 
     /**
-     * Check wether the download request has succeed and the file is available from filesystem.
+     * Check wether the download request can be handled (save / download) and the file is available from filesystem.
      *
      * @return boolean
      */
     public function isProcessable()
     {
         if (!file_exists($this->filePath)) {
-            $this->addError(new DownloadRequestError('Matched file path not existing on the server'));
+            $this->addError(new DownloadRequestError(ErrorCode::INVALID_FILEPATH, 'File path does not exist on the server.'));
         }
 
         return count($this->getErrors()) === 0;
