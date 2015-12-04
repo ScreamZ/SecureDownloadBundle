@@ -7,6 +7,7 @@ use Screamz\SecureDownloadBundle\Core\Classes\DownloadRequestError;
 use Screamz\SecureDownloadBundle\Core\Classes\ErrorCode;
 use Screamz\SecureDownloadBundle\Core\Exceptions\DownloadRequestException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Tedivm\StashBundle\Service\CacheService;
 use Stash\Invalidation;
 
@@ -58,7 +59,7 @@ class SecureDownloader
         $documentHashTTL = $documentHashTTL ?: static::$DOCUMENT_HASH_TTL;
 
         // Sanitize string (folder path) and check path
-        $filePath = preg_filter('%/{2,}%', '/', $filePath);
+        $filePath = preg_replace('%/{2,}%', '/', $filePath);
         $futureDownloadRequest = new DownloadRequest($filePath, $accessKey);
 
         // Check if the request is processable (filepath exists, ...)
@@ -95,7 +96,14 @@ class SecureDownloader
         $downloadRequest = $this->createDownloadRequest($documentHash, $accessKey);
 
         if ($downloadRequest->isProcessable()) {
-            return new BinaryFileResponse($downloadRequest->getFilePath());
+            $binaryResponse = new BinaryFileResponse($downloadRequest->getFilePath());
+            $binaryResponse->setContentDisposition(
+                ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+                basename($downloadRequest->getFilePath()),
+                iconv('UTF-8', 'ASCII//TRANSLIT', basename($downloadRequest->getFilePath()))
+            );
+
+            return $binaryResponse;
         } else {
             throw new DownloadRequestException($downloadRequest);
         }
