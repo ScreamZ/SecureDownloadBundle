@@ -30,6 +30,18 @@ class DownloadRequestException extends \Exception
     }
 
     /**
+     * @inheritDoc
+     */
+    public function __toString()
+    {
+        $string = '';
+        foreach ($this->downloadRequest->getErrors() as $error) {
+            $string .= (string)$error . '|';
+        }
+        return $string;
+    }
+
+    /**
      * Get the errors array, you can refer to error codes to handle different cases.
      *
      * @return DownloadRequestError[]
