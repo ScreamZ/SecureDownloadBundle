@@ -11,5 +11,5 @@ Therefore each instance of DownloadRequestError has an error code, here is the e
 * **0** - This is the default error when none has been given.
 * **1** - The document has expired or is not found using given hash.
 * **2** - The returned document is not an instance of DownloadRequest (you've fetched something that this bundle didn't stored, try to change stash_prefix_key parameter).
-* **3** - The returned document is not an instance of DownloadRequest (you've fetched something that this bundle didn't stored, try to change stash_prefix_key parameter).
-* **4** - The given filepath to store doesn't exists on the server.
+* **3** - The given access key is invalid, you're not allowed to download the document.
+* **4** - The given filepath to store doesn't exists on the server. (Can be throw at the saving or at the downloading of the document)
