@@ -126,7 +126,7 @@ class SecureDownloader
         $downloadRequest = $this->createDownloadRequest($documentHash, $accessKey);
 
         if ($downloadRequest->isProcessable()) {
-            return new BlobResponse($downloadRequest->getFilePath(), Response::HTTP_OK);
+            return new BlobResponse($downloadRequest->getFilePath(), 200);
         } else {
             throw new DownloadRequestException($downloadRequest);
         }
