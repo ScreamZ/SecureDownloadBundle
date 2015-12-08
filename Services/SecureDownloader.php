@@ -5,8 +5,10 @@ namespace Screamz\SecureDownloadBundle\Services;
 use Screamz\SecureDownloadBundle\Core\Classes\DownloadRequest;
 use Screamz\SecureDownloadBundle\Core\Classes\DownloadRequestError;
 use Screamz\SecureDownloadBundle\Core\Classes\ErrorCode;
+use Screamz\SecureDownloadBundle\Core\Classes\Response\BlobResponse;
 use Screamz\SecureDownloadBundle\Core\Exceptions\DownloadRequestException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Tedivm\StashBundle\Service\CacheService;
 use Stash\Invalidation;
@@ -104,6 +106,27 @@ class SecureDownloader
             );
 
             return $binaryResponse;
+        } else {
+            throw new DownloadRequestException($downloadRequest);
+        }
+    }
+
+    /**
+     * Attempt to encode the file as a base64 data hash, used for multiple purpose like rendering it from template or send image through web service.
+     *
+     * @param string $documentHash
+     * @param string $accessKey
+     *
+     * @return BlobResponse A response with a base64 content of the document stored.
+     *
+     * @throws DownloadRequestException
+     */
+    public function getBase64Blob($documentHash, $accessKey)
+    {
+        $downloadRequest = $this->createDownloadRequest($documentHash, $accessKey);
+
+        if ($downloadRequest->isProcessable()) {
+            return new BlobResponse($downloadRequest->getFilePath(), Response::HTTP_OK);
         } else {
             throw new DownloadRequestException($downloadRequest);
         }
