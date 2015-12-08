@@ -21,7 +21,7 @@ class BlobResponse extends Response
      * @param array  $headers
      *
      */
-    public function __construct($documentPath, $status = self::HTTP_OK, array $headers = array())
+    public function __construct($documentPath, $status = 200, array $headers = array())
     {
         $content = base64_encode(file_get_contents($documentPath));
         $finfoMineType = finfo_open(FILEINFO_MIME_TYPE);
