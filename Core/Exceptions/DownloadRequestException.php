@@ -19,6 +19,10 @@ use Screamz\SecureDownloadBundle\Core\Classes\DownloadRequestError;
 class DownloadRequestException extends \Exception
 {
     /**
+     * @var DownloadRequest
+     */
+    private $downloadRequest;
+    /**
      * DownloadRequestException constructor.
      *
      * @param DownloadRequest $downloadRequest
@@ -26,7 +30,7 @@ class DownloadRequestException extends \Exception
     public function __construct(DownloadRequest $downloadRequest)
     {
         $this->downloadRequest = $downloadRequest;
-        parent::__construct('An '.__CLASS__.' has been thrown, please catch it to handle this error case.');
+        parent::__construct('WARNING : A '.__CLASS__.' has been thrown at '.$this->getFile().':'.$this->getLine().', please catch it upstream to avoid this message.');
     }
 
     /**
@@ -51,5 +55,15 @@ class DownloadRequestException extends \Exception
     public function getReasons()
     {
         return $this->downloadRequest->getErrors();
+    }
+
+    /**
+     * Return the given document filePath
+     *
+     * @return string
+     */
+    public function getDocumentPath()
+    {
+        return $this->downloadRequest->getFilePath();
     }
 }
