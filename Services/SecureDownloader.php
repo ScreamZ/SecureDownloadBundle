@@ -7,11 +7,10 @@ use Screamz\SecureDownloadBundle\Core\Classes\DownloadRequestError;
 use Screamz\SecureDownloadBundle\Core\Classes\ErrorCode;
 use Screamz\SecureDownloadBundle\Core\Classes\Response\BlobResponse;
 use Screamz\SecureDownloadBundle\Core\Exceptions\DownloadRequestException;
+use Stash\Invalidation;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Tedivm\StashBundle\Service\CacheService;
-use Stash\Invalidation;
 
 /**
  * Class SecureDownloader
@@ -22,7 +21,6 @@ use Stash\Invalidation;
  */
 class SecureDownloader
 {
-    public static $DOCUMENT_HASH_TTL;
     private $stash;
     private $stashPrefixKey;
     private $documentHashSalt;
@@ -39,7 +37,7 @@ class SecureDownloader
         $this->stash = $cacheService;
         $this->stashPrefixKey = $config['cache']['stash_prefix_key'];
         $this->defaultTTL = $config['cache']['default_ttl'];
-        static::$DOCUMENT_HASH_TTL = $config['document']['hash_salt'];
+        $this->documentHashSalt = $config['document']['hash_salt'];
 
     }
 
@@ -58,7 +56,7 @@ class SecureDownloader
     public function generateHash($filePath, $accessKey, $documentHashTTL = null)
     {
         // Set default cache TTL from config if not specified
-        $documentHashTTL = $documentHashTTL ?: static::$DOCUMENT_HASH_TTL;
+        $documentHashTTL = $documentHashTTL ?: $this->defaultTTL;
 
         // Sanitize string (folder path) and check path
         $filePath = preg_replace('%/{2,}%', '/', $filePath);
