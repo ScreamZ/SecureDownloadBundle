@@ -1,4 +1,5 @@
 #SecureDownloadBundle
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/cfe0a24c-3efb-4bfe-a7f5-a3f00ab41bb3/big.png)](https://insight.sensiolabs.com/projects/cfe0a24c-3efb-4bfe-a7f5-a3f00ab41bb3)
 
 **This bundle is under development, the documentation will be updated through the development process.**
 
