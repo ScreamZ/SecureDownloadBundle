@@ -20,7 +20,7 @@ Feel free to try different approaches.
 Here is an quick and easy example :
 
 ###Rendering the hash in a view or returned it to a web service
-
+```php
     public function generateHashAction()
     {
         $secureDownloader = $this->get('screamz.service.secure_downloader');
@@ -43,9 +43,10 @@ Here is an quick and easy example :
         
         // Return response with hash (webservice) or render a template with link to download controller...
     }
+```
 
 ###Downloading the file using the given hash
-
+```php
     public function downloadAction($hash)
     {
         $secureDownloader = $this->get('screamz.service.secure_downloader');
@@ -65,6 +66,7 @@ Here is an quick and easy example :
             throw new HttpException(500);
         }
     }
+```
 
 ##Documentation
 
