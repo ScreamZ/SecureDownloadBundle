@@ -21,51 +21,51 @@ Here is an quick and easy example :
 
 ###Rendering the hash in a view or returned it to a web service
 ```php
-    public function generateHashAction()
-    {
-        $secureDownloader = $this->get('screamz.service.secure_downloader');
-        $currentUser = $this->getAuthenticationManager()->getCurrentUser();
-    
-        // Provided by the server (client don't know it), use something that identify the current logged user.
-        $accessKey = md5('somecustomhash'.$currentUser->getUserHash());
-    
-        try{
-            $hash = $secureDownloader->generateHash('/home/site/www/document.txt', $accessKey);
-        } catch {DownloadRequestException $e){
-            // Do something with errors
-            var_dump($e->getReasons());
-             
-            // Throw a 400 / 500 HTTP exception
-            throw new HttpException(500);
-        }
-        
-        // Do something...
-        
-        // Return response with hash (webservice) or render a template with link to download controller...
+public function generateHashAction()
+{
+    $secureDownloader = $this->get('screamz.service.secure_downloader');
+    $currentUser = $this->getAuthenticationManager()->getCurrentUser();
+
+    // Provided by the server (client don't know it), use something that identify the current logged user.
+    $accessKey = md5('somecustomhash'.$currentUser->getUserHash());
+
+    try{
+        $hash = $secureDownloader->generateHash('/home/site/www/document.txt', $accessKey);
+    } catch {DownloadRequestException $e){
+        // Do something with errors
+        var_dump($e->getReasons());
+         
+        // Throw a 400 / 500 HTTP exception
+        throw new HttpException(500);
     }
+    
+    // Do something...
+    
+    // Return response with hash (webservice) or render a template with link to download controller...
+}
 ```
 
 ###Downloading the file using the given hash
 ```php
-    public function downloadAction($hash)
-    {
-        $secureDownloader = $this->get('screamz.service.secure_downloader');
-        $currentUser = $this->getAuthenticationManager()->getCurrentUser();
+public function downloadAction($hash)
+{
+    $secureDownloader = $this->get('screamz.service.secure_downloader');
+    $currentUser = $this->getAuthenticationManager()->getCurrentUser();
 
-        // Provided by the server (client don't know it), use something that identify the current logged user.
-        $accessKey = md5('somecustomhash'.$currentUser->getId());
+    // Provided by the server (client don't know it), use something that identify the current logged user.
+    $accessKey = md5('somecustomhash'.$currentUser->getId());
+    
+    try {
+        $binaryResponse = $secureDownloader->downloadHash($hash, $accessKey);
+        return $binaryResponse;
+    } catch (DownloadRequestException $e) {
+        // Do something with errors
+        var_dump($e->getReasons());
         
-        try {
-            $binaryResponse = $secureDownloader->downloadHash($hash, $accessKey);
-            return $binaryResponse;
-        } catch (DownloadRequestException $e) {
-            // Do something with errors
-            var_dump($e->getReasons());
-            
-            // Throw a 400 / 500 HTTP exception
-            throw new HttpException(500);
-        }
+        // Throw a 400 / 500 HTTP exception
+        throw new HttpException(500);
     }
+}
 ```
 
 ##Documentation
