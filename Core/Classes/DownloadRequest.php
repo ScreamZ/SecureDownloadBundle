@@ -15,6 +15,7 @@ class DownloadRequest
     /** @var DownloadRequestError[] */
     private $requestErrors;
     private $accessKey;
+    private $hash;
 
     /**
      * DownloadRequest constructor.
@@ -28,6 +29,20 @@ class DownloadRequest
         $this->filePath = $filePath;
     }
 
+    /**
+     * Generate an unique hash for the document using a salt given as parameter and the filepath.
+     *
+     * @param string $documentHashSalt
+     *
+     * @return string
+     */
+    public function generateRequestHash($documentHashSalt)
+    {
+        $documentHash = md5($documentHashSalt.$this->filePath);
+        $this->hash = $documentHash;
+
+        return $documentHash;
+    }
 
     /**
      * Check wether the download request can be handled (save / download) and the file is available from filesystem.
@@ -41,6 +56,18 @@ class DownloadRequest
         }
 
         return count($this->getErrors()) === 0;
+    }
+
+    /**
+     * Compare the given accessKey with the one provided on document hash generation.
+     *
+     * @param string $accessKey
+     *
+     * @return bool
+     */
+    public function isAccessKeyValid($accessKey)
+    {
+        return $this->accessKey === $accessKey;
     }
 
     /**
@@ -74,14 +101,12 @@ class DownloadRequest
     }
 
     /**
-     * Compare the given accessKey with the one provided on document hash generation.
+     * Get the document hash
      *
-     * @param string $accessKey
-     *
-     * @return bool
+     * @return string
      */
-    public function isAccessKeyValid($accessKey)
+    public function getHash()
     {
-        return $this->accessKey === $accessKey;
+        return $this->hash;
     }
 }

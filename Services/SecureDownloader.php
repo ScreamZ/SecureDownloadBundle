@@ -45,13 +45,13 @@ class SecureDownloader
      * Generate an unique Hash that will be used to query download later.
      *
      * @param string $filePath        full path to the document
-     * @param string $accessKey       A key (hash is nice) that will be required on {@link SecureDownloader::createDownloadRequest() }
+     * @param string $accessKey       A key (hash is nice) that will be required on {@link SecureDownloader::initiateDownloadRequest() }
      * @param int    $documentHashTTL Optionnal : HASH TTL in seconds, if null it will use the default value defined in config)
      *
-     * @return string The hash that will be used by {@link SecureDownloader::createDownloadRequest()} to fetch the document.
+     * @return string The hash that will be used by {@link SecureDownloader::initiateDownloadRequest()} to fetch the document.
      * @throws DownloadRequestException
      *
-     * @see SecureDownloader::createDownloadRequest()
+     * @see SecureDownloader::initiateDownloadRequest()
      */
     public function generateHash($filePath, $accessKey, $documentHashTTL = null)
     {
@@ -67,7 +67,7 @@ class SecureDownloader
             throw new DownloadRequestException($futureDownloadRequest);
         }
 
-        $documentHash = md5($this->documentHashSalt.$filePath);
+        $documentHash = $futureDownloadRequest->generateRequestHash($this->documentHashSalt);
 
         $cacheItem = $this->stash->getItem($this->stashPrefixKey.'/'.$documentHash);
         $transactionSucceed = $cacheItem->set($futureDownloadRequest, $documentHashTTL);
@@ -78,6 +78,20 @@ class SecureDownloader
         }
 
         return $documentHash;
+    }
+
+    /**
+     * Mark the download request as stale, another call using this hash will make the request miss.
+     *
+     * @param DownloadRequest $downloadRequest
+     *
+     * @return bool
+     */
+    public function invalidate(DownloadRequest $downloadRequest)
+    {
+        $downloadRequest = $this->stash->getItem($this->stashPrefixKey.'/'.$downloadRequest->getHash());
+
+        return $downloadRequest->clear();
     }
 
     /**
@@ -93,7 +107,7 @@ class SecureDownloader
      */
     public function downloadHash($documentHash, $accessKey)
     {
-        $downloadRequest = $this->createDownloadRequest($documentHash, $accessKey);
+        $downloadRequest = $this->initiateDownloadRequest($documentHash, $accessKey);
 
         if ($downloadRequest->isProcessable()) {
             $binaryResponse = new BinaryFileResponse($downloadRequest->getFilePath());
@@ -121,7 +135,7 @@ class SecureDownloader
      */
     public function getBase64Blob($documentHash, $accessKey)
     {
-        $downloadRequest = $this->createDownloadRequest($documentHash, $accessKey);
+        $downloadRequest = $this->initiateDownloadRequest($documentHash, $accessKey);
 
         if ($downloadRequest->isProcessable()) {
             return new BlobResponse($downloadRequest->getFilePath(), 200);
@@ -131,14 +145,14 @@ class SecureDownloader
     }
 
     /**
-     * Instantiate a new download request.
+     * Initiate the download request, create a new instance with given parameters.
      *
      * @param string $documentHash The documentHash generated using {@link SecureDownloader::generateHash()}
      * @param string $accessKey    A key (hash is nice) that is compared to the one used set when the document hash has been generated.
      *
      * @return DownloadRequest
      */
-    private function createDownloadRequest($documentHash, $accessKey)
+    private function initiateDownloadRequest($documentHash, $accessKey)
     {
         $cacheItem = $this->stash->getItem($this->stashPrefixKey.'/'.$documentHash);
 
