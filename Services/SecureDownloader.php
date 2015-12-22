@@ -83,15 +83,22 @@ class SecureDownloader
     /**
      * Mark the download request as stale, another call using this hash will make the request miss.
      *
-     * @param DownloadRequest $downloadRequest
+     * @param string $documentHash
+     * @param string $accessKey
      *
      * @return bool
+     * @throws DownloadRequestException
      */
-    public function invalidate(DownloadRequest $downloadRequest)
+    public function invalidate($documentHash, $accessKey)
     {
-        $downloadRequest = $this->stash->getItem($this->stashPrefixKey.'/'.$downloadRequest->getHash());
+        $downloadRequest = $this->initiateDownloadRequest($documentHash, $accessKey);
+        if ($downloadRequest->isProcessable()) {
+            $downloadRequest = $this->stash->getItem($this->stashPrefixKey.'/'.$downloadRequest->getHash());
 
-        return $downloadRequest->clear();
+            return $downloadRequest->clear();
+        } else {
+            throw new DownloadRequestException($downloadRequest);
+        }
     }
 
     /**
