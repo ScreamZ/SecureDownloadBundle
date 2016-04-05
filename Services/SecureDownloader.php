@@ -117,7 +117,7 @@ class SecureDownloader
         $downloadRequest = $this->initiateDownloadRequest($documentHash, $accessKey);
 
         if ($downloadRequest->isProcessable()) {
-            $binaryResponse = new BinaryFileResponse($downloadRequest->getFilePath());
+            $binaryResponse = new BinaryFileResponse($downloadRequest->getFilePath(), 200, array(), false);
             $binaryResponse->setContentDisposition(
                 ResponseHeaderBag::DISPOSITION_ATTACHMENT,
                 basename($downloadRequest->getFilePath()),
