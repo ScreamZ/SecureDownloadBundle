@@ -92,13 +92,13 @@ class SecureDownloader
     public function invalidate($documentHash, $accessKey)
     {
         $downloadRequest = $this->initiateDownloadRequest($documentHash, $accessKey);
-        if ($downloadRequest->isProcessable()) {
-            $downloadRequest = $this->stash->getItem($this->stashPrefixKey.'/'.$downloadRequest->getHash());
-
-            return $downloadRequest->clear();
-        } else {
+        if (!$downloadRequest->isProcessable()) {
             throw new DownloadRequestException($downloadRequest);
         }
+
+        $downloadRequest = $this->stash->getItem($this->stashPrefixKey.'/'.$downloadRequest->getHash());
+
+        return $downloadRequest->clear();
     }
 
     /**
@@ -144,11 +144,11 @@ class SecureDownloader
     {
         $downloadRequest = $this->initiateDownloadRequest($documentHash, $accessKey);
 
-        if ($downloadRequest->isProcessable()) {
-            return new BlobResponse($downloadRequest->getFilePath(), 200);
-        } else {
+        if (!$downloadRequest->isProcessable()) {
             throw new DownloadRequestException($downloadRequest);
         }
+
+        return new BlobResponse($downloadRequest->getFilePath(), 200);
     }
 
     /**
@@ -163,7 +163,6 @@ class SecureDownloader
     {
         $cacheItem = $this->stash->getItem($this->stashPrefixKey.'/'.$documentHash);
 
-        // A voir la méthode d'invalidation
         $downloadRequest = $cacheItem->get(Invalidation::NONE);
 
         if ($cacheItem->isMiss()) {

@@ -32,6 +32,8 @@ class DownloadRequest
     /**
      * Generate an unique hash for the document using a salt given as parameter and the filepath.
      *
+     * Path is unique on the system so there is no name conflict possible.
+     *
      * @param string $documentHashSalt
      *
      * @return string
