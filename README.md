@@ -1,4 +1,5 @@
-#SecureDownloadBundle
+# SecureDownloadBundle
+
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/cfe0a24c-3efb-4bfe-a7f5-a3f00ab41bb3/big.png)](https://insight.sensiolabs.com/projects/cfe0a24c-3efb-4bfe-a7f5-a3f00ab41bb3)
 
 **This bundle is under development, the documentation will be updated through the development process.**
@@ -9,7 +10,7 @@ Many cache system are supported thanks to [tedious/TedivmStashBundle!](https://g
 At the moment the default one using service [@stash]( TedivmStashBundle/Service/CacheService.php), but
 feel free to override my service declaration to use your own.
 
-##Basic usage
+## Basic usage
 
 This is a two-step process, first you need to generate a unique hash, then this one will be used to call the download method.
 
@@ -19,7 +20,7 @@ Feel free to try different approaches.
 
 Here is an quick and easy example :
 
-###Rendering the hash in a view or returned it to a web service
+### Rendering the hash in a view or returned it to a web service
 ```php
 public function generateHashAction()
 {
@@ -45,7 +46,7 @@ public function generateHashAction()
 }
 ```
 
-###Downloading the file using the given hash
+### Downloading the file using the given hash
 ```php
 public function downloadAction($hash)
 {
@@ -68,7 +69,7 @@ public function downloadAction($hash)
 }
 ```
 
-##Documentation
+## Documentation
 
 * [Error codes](/Resources/doc/error_codes.md)
 * [Default configuration](/Resources/doc/config.md)

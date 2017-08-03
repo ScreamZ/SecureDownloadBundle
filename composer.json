@@ -27,7 +27,7 @@
     "symfony/http-kernel": ">=2.1,<4.0",
     "symfony/dependency-injection": ">=2.1,<4.0",
     "symfony/config": ">=2.3,<4.0",
-    "tedivm/stash-bundle": "0.4.*"
+    "tedivm/stash-bundle": "~0.4"
   },
   "autoload": {
     "psr-4": {"Screamz\\SecureDownloadBundle\\": ""}
