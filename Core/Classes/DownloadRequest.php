@@ -13,9 +13,9 @@ class DownloadRequest
 {
     private $filePath;
     /** @var DownloadRequestError[] */
-    private $requestErrors;
-    private $accessKey;
-    private $hash;
+    protected $requestErrors;
+    protected $accessKey;
+    protected $hash;
 
     /**
      * DownloadRequest constructor.
@@ -47,7 +47,7 @@ class DownloadRequest
     }
 
     /**
-     * Check wether the download request can be handled (save / download) and the file is available from filesystem.
+     * Check whether the download request can be handled (save / download) and the file is available from filesystem.
      *
      * @return boolean
      */
@@ -97,7 +97,7 @@ class DownloadRequest
      *
      * @return string
      */
-    public function getFilePath()
+    public function getRequestSavedData()
     {
         return $this->filePath;
     }

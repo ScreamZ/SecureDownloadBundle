@@ -5,13 +5,13 @@ namespace Screamz\SecureDownloadBundle\Core\Classes\Response;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class BlobResponse
+ * Class Base64BinaryFileResponse
  *
  * This response should be used when you need to return a blob (Like base64 encoded image).
  *
  * @author Andréas HANSS <ahanss@kaliop.com>
  */
-class BlobResponse extends Response
+class Base64BinaryFileResponse extends Response
 {
     /**
      * BlobResponse constructor.

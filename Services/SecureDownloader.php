@@ -5,7 +5,8 @@ namespace Screamz\SecureDownloadBundle\Services;
 use Screamz\SecureDownloadBundle\Core\Classes\DownloadRequest;
 use Screamz\SecureDownloadBundle\Core\Classes\DownloadRequestError;
 use Screamz\SecureDownloadBundle\Core\Classes\ErrorCode;
-use Screamz\SecureDownloadBundle\Core\Classes\Response\BlobResponse;
+use Screamz\SecureDownloadBundle\Core\Classes\ResourceDownloadRequest;
+use Screamz\SecureDownloadBundle\Core\Classes\Response\Base64BinaryFileResponse;
 use Screamz\SecureDownloadBundle\Core\Exceptions\DownloadRequestException;
 use Stash\Invalidation;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -45,10 +46,13 @@ class SecureDownloader
      * Generate an unique Hash that will be used to query download later.
      *
      * @param string $filePath        full path to the document
-     * @param string $accessKey       A key (hash is nice) that will be required on {@link SecureDownloader::initiateDownloadRequest() }
-     * @param int    $documentHashTTL Optionnal : HASH TTL in seconds, if null it will use the default value defined in config)
+     * @param string $accessKey       A key (hash is nice) that will be required on
+     *                                {@link SecureDownloader::initiateDownloadRequest() }
+     * @param int    $documentHashTTL Optionnal : HASH TTL in seconds, if null it will use the default value defined in
+     *                                config)
      *
-     * @return string The hash that will be used by {@link SecureDownloader::initiateDownloadRequest()} to fetch the document.
+     * @return string The hash that will be used by {@link SecureDownloader::initiateDownloadRequest()} to fetch the
+     *                document.
      * @throws DownloadRequestException
      *
      * @see SecureDownloader::initiateDownloadRequest()
@@ -69,7 +73,7 @@ class SecureDownloader
 
         $documentHash = $futureDownloadRequest->generateRequestHash($this->documentHashSalt);
 
-        $cacheItem = $this->stash->getItem($this->stashPrefixKey.'/'.$documentHash);
+        $cacheItem = $this->stash->getItem($this->stashPrefixKey . '/' . $documentHash);
         $transactionSucceed = $cacheItem->set($futureDownloadRequest, $documentHashTTL);
 
         if (!$transactionSucceed) {
@@ -96,7 +100,7 @@ class SecureDownloader
             throw new DownloadRequestException($downloadRequest);
         }
 
-        $downloadRequest = $this->stash->getItem($this->stashPrefixKey.'/'.$downloadRequest->getHash());
+        $downloadRequest = $this->stash->getItem($this->stashPrefixKey . '/' . $downloadRequest->getHash());
 
         return $downloadRequest->clear();
     }
@@ -105,7 +109,8 @@ class SecureDownloader
      * Attempt to download the document matching the given path.
      *
      * @param string $documentHash The documentHash generated using {@link SecureDownloader::generateHash()}
-     * @param string $accessKey    A key (hash is nice) that is compared to the one used set when the document hash has been generated.
+     * @param string $accessKey    A key (hash is nice) that is compared to the one used set when the document hash has
+     *                             been generated.
      *
      * @return BinaryFileResponse
      * @throws DownloadRequestException
@@ -120,23 +125,24 @@ class SecureDownloader
             throw new DownloadRequestException($downloadRequest);
         }
 
-        $binaryResponse = new BinaryFileResponse($downloadRequest->getFilePath(), 200, array(), false);
+        $binaryResponse = new BinaryFileResponse($downloadRequest->getRequestSavedData(), 200, array(), false);
         $binaryResponse->setContentDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-            basename($downloadRequest->getFilePath()),
-            iconv('UTF-8', 'ASCII//TRANSLIT', basename($downloadRequest->getFilePath()))
+            basename($downloadRequest->getRequestSavedData()),
+            iconv('UTF-8', 'ASCII//TRANSLIT', basename($downloadRequest->getRequestSavedData()))
         );
 
         return $binaryResponse;
     }
 
     /**
-     * Attempt to encode the file as a base64 data hash, used for multiple purpose like rendering it from template or send image through web service.
+     * Attempt to encode the file as a base64 data hash, used for multiple purpose like rendering it from template or
+     * send image through web service.
      *
      * @param string $documentHash
      * @param string $accessKey
      *
-     * @return BlobResponse A response with a base64 content of the document stored.
+     * @return Base64BinaryFileResponse A response with a base64 content of the document stored.
      *
      * @throws DownloadRequestException
      */
@@ -148,20 +154,21 @@ class SecureDownloader
             throw new DownloadRequestException($downloadRequest);
         }
 
-        return new BlobResponse($downloadRequest->getFilePath(), 200);
+        return new Base64BinaryFileResponse($downloadRequest->getRequestSavedData(), 200);
     }
 
     /**
      * Initiate the download request, create a new instance with given parameters.
      *
      * @param string $documentHash The documentHash generated using {@link SecureDownloader::generateHash()}
-     * @param string $accessKey    A key (hash is nice) that is compared to the one used set when the document hash has been generated.
+     * @param string $accessKey    A key (hash is nice) that is compared to the one used set when the document hash has
+     *                             been generated.
      *
-     * @return DownloadRequest
+     * @return DownloadRequest|ResourceDownloadRequest
      */
     private function initiateDownloadRequest($documentHash, $accessKey)
     {
-        $cacheItem = $this->stash->getItem($this->stashPrefixKey.'/'.$documentHash);
+        $cacheItem = $this->stash->getItem($this->stashPrefixKey . '/' . $documentHash);
 
         $downloadRequest = $cacheItem->get(Invalidation::NONE);
 
@@ -190,5 +197,43 @@ class SecureDownloader
         }
 
         return $downloadRequest;
+    }
+
+    /**
+     * @param string $resourceIdentifier An unique identifier that identify the resource in the whole system.
+     * @param string $accessKey          A key (hash is nice) that is compared to the one used set when the document
+     *                                   hash has been generated. You can also use current user unique data.
+     * @param int    $resourceHashTTL    A TTL after when the authorization will expires(in ms).
+     *
+     * @return string The resource hash that will be required in order to check resource authorization further.
+     *
+     * @throws DownloadRequestException
+     */
+    public function preAuthorizeResource($resourceIdentifier, $accessKey, $resourceHashTTL = null)
+    {
+        // Set default cache TTL from config if not specified
+        $resourceHashTTL = $resourceHashTTL ?: $this->defaultTTL;
+        $futureDownloadRequest = new ResourceDownloadRequest($resourceIdentifier, $accessKey);
+
+        if (!$futureDownloadRequest->isProcessable()) {
+            throw new DownloadRequestException($futureDownloadRequest);
+        }
+
+        $documentHash = $futureDownloadRequest->generateRequestHash($this->documentHashSalt);
+
+        $cacheItem = $this->stash->getItem($this->stashPrefixKey . '/' . $documentHash);
+        $transactionSucceed = $cacheItem->set($futureDownloadRequest, $resourceHashTTL);
+
+        if (!$transactionSucceed) {
+            $futureDownloadRequest->addError(new DownloadRequestError('Unable to set item in stash pool'));
+            throw new DownloadRequestException($futureDownloadRequest);
+        }
+
+        return $documentHash;
+    }
+
+    public function checkResourceAuthorization($resourceIdentifier, $accessKey)
+    {
+        return $this->initiateDownloadRequest($resourceIdentifier, $accessKey)->isProcessable();
     }
 }
