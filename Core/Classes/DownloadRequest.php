@@ -13,9 +13,11 @@ class DownloadRequest
 {
     private $filePath;
     /** @var DownloadRequestError[] */
-    protected $requestErrors;
+    protected $requestErrors = [];
     protected $accessKey;
-    protected $hash;
+    protected $transactionID;
+    protected $resourceName;
+    protected $mimeType;
 
     /**
      * DownloadRequest constructor.
@@ -27,41 +29,45 @@ class DownloadRequest
     {
         $this->accessKey = $accessKey;
         $this->filePath = $filePath;
+
+        if (file_exists($filePath)) {
+            $this->resourceName = basename($filePath);
+            $this->mimeType = mime_content_type($filePath);
+        } else {
+            $this->addError(new DownloadRequestError(ErrorCode::INVALID_FILEPATH, 'File path does not exist on the server.'));
+        }
+
     }
 
     /**
-     * Generate an unique hash for the document using a salt given as parameter and the filepath.
+     * Generate an unique hash for the transaction using a salt given as parameter and the filepath.
      *
      * Path is unique on the system so there is no name conflict possible.
      *
-     * @param string $documentHashSalt
+     * @param string $transactionHashSalt
      *
      * @return string
      */
-    public function generateRequestHash($documentHashSalt)
+    public function generateTransactionIdentifier($transactionHashSalt)
     {
-        $documentHash = md5($documentHashSalt.$this->filePath);
-        $this->hash = $documentHash;
+        $transactionID = md5($transactionHashSalt.$this->filePath);
+        $this->transactionID = $transactionID;
 
-        return $documentHash;
+        return $transactionID;
     }
 
     /**
-     * Check whether the download request can be handled (save / download) and the file is available from filesystem.
+     * Check whether the download request can be handled, meaning it has no errors.
      *
      * @return boolean
      */
     public function isProcessable()
     {
-        if (!file_exists($this->filePath)) {
-            $this->addError(new DownloadRequestError(ErrorCode::INVALID_FILEPATH, 'File path does not exist on the server.'));
-        }
-
         return count($this->getErrors()) === 0;
     }
 
     /**
-     * Compare the given accessKey with the one provided on document hash generation.
+     * Compare the given accessKey with the one provided on transaction generation.
      *
      * @param string $accessKey
      *
@@ -73,7 +79,7 @@ class DownloadRequest
     }
 
     /**
-     * Add a new error to the request
+     * Add a new error to the request.
      *
      * @param DownloadRequestError $error
      */
@@ -85,7 +91,7 @@ class DownloadRequest
     /**
      * Get the error list
      *
-     * @return array
+     * @return DownloadRequestError[]
      */
     public function getErrors()
     {
@@ -97,9 +103,25 @@ class DownloadRequest
      *
      * @return string
      */
-    public function getRequestSavedData()
+    public function getTransactionSavedData()
     {
         return $this->filePath;
+    }
+
+    /**
+     * @return string
+     */
+    public function getResourceName()
+    {
+        return $this->resourceName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMimeType()
+    {
+        return $this->mimeType;
     }
 
     /**
@@ -107,8 +129,8 @@ class DownloadRequest
      *
      * @return string
      */
-    public function getHash()
+    public function getTransactionID()
     {
-        return $this->hash;
+        return $this->transactionID;
     }
 }

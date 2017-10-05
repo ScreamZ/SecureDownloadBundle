@@ -64,6 +64,6 @@ class DownloadRequestException extends \Exception
      */
     public function getDocumentPath()
     {
-        return $this->downloadRequest->getRequestSavedData();
+        return $this->downloadRequest->getTransactionSavedData();
     }
 }

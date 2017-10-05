@@ -14,7 +14,7 @@ class ResourceDownloadRequest extends DownloadRequest
     /**
      * @var string
      */
-    private $resourceIdentifier;
+    private $resourceData;
 
     /**
      * DownloadRequest constructor.
@@ -24,8 +24,8 @@ class ResourceDownloadRequest extends DownloadRequest
      */
     public function __construct($resourceIdentifier, $accessKey)
     {
-        parent::__construct(null, $accessKey);
-        $this->resourceIdentifier = $resourceIdentifier;
+        $this->accessKey = $accessKey;
+        $this->resourceData = $resourceIdentifier;
     }
 
     /**
@@ -37,19 +37,21 @@ class ResourceDownloadRequest extends DownloadRequest
      *
      * @return string
      */
-    public function generateRequestHash($documentHashSalt)
+    public function generateTransactionIdentifier($documentHashSalt)
     {
-        $resourceHash = md5($documentHashSalt.$this->resourceIdentifier);
-        $this->hash = $resourceHash;
+        $resourceHash = md5($documentHashSalt.$this->resourceData);
+        $this->transactionID = $resourceHash;
 
         return $resourceHash;
     }
 
     /**
-     * @inheritdoc
+     * Get the resource saved data
+     *
+     * @return string
      */
-    public function isProcessable()
+    public function getTransactionSavedData()
     {
-         return count($this->getErrors()) === 0;
+        return $this->resourceData;
     }
 }
